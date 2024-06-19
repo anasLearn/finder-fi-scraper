@@ -1,4 +1,5 @@
 import time
+import traceback
 
 import requests
 from bs4 import BeautifulSoup
@@ -76,9 +77,11 @@ def extract_company_info(company_soup: BeautifulSoup):
         city = address.split()[-1]
 
     # Managing director
-    director_tag = company_soup.find(class_=director_css_class).find("strong")
-    if director_tag:
-        managing_director = director_tag.text
+    decision_person_tag = company_soup.find(class_=director_css_class)
+    if decision_person_tag:
+        director_tag = decision_person_tag.find("strong")
+        if director_tag:
+            managing_director = director_tag.text
 
     # Short description
     dt_tag = company_soup.find('dt', string="Toimialat")
@@ -89,12 +92,13 @@ def extract_company_info(company_soup: BeautifulSoup):
 
     # Financial data
     table_tag = company_soup.find(class_=financial_table_css_class)
-    financial_dict = extract_financial_data_from_table(table_tag)
-    for year_key in financial_dict:
-        if "2022" in year_key:
-            turnover_2022 = financial_dict[year_key]
-        elif "2023" in year_key:
-            turnover_2023 = financial_dict[year_key]
+    if table_tag:
+        financial_dict = extract_financial_data_from_table(table_tag)
+        for year_key in financial_dict:
+            if "2022" in year_key:
+                turnover_2022 = financial_dict[year_key]
+            elif "2023" in year_key:
+                turnover_2023 = financial_dict[year_key]
 
     # Number of employees
     dt_tag = company_soup.find('dt', string="Toimipaikan henkilöstöluokka")
@@ -130,8 +134,12 @@ def extract_company_info(company_soup: BeautifulSoup):
 
 def scrap_company_info(company_url: str):
     company_soup = get_page_soup(company_url)
-    company_info = extract_company_info(company_soup)
-    return company_info
+    try:
+        company_info = extract_company_info(company_soup)
+        return company_info
+    except Exception as e:
+        print(company_url, "not scraped")
+        # traceback.print_exc()
 
 
 if __name__ == "__main__":

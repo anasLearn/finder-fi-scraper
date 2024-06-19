@@ -7,7 +7,7 @@ output_file = "output.csv"
 
 def read_urls(file_path):
     with open(file_path, 'r') as file:
-        urls = file.read().splitlines()
+        urls = [line.strip() for line in file if line.strip()]
     return urls
 
 
@@ -17,7 +17,11 @@ print("Scraping started. Please wait...\n")
 company_urls = read_urls(input_file)
 
 # Scrape each URL and gather the dictionaries
-dictionaries = [scrap_company_info(url) for url in company_urls]
+dictionaries = []
+for url in company_urls:
+    company_dict = scrap_company_info(url)
+    if company_dict:
+        dictionaries.append(company_dict)
 
 # Extract keys for the CSV header from the first dictionary
 header = dictionaries[0].keys()
