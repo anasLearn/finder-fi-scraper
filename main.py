@@ -1,5 +1,5 @@
 import csv
-from scrap_page import scrap_company_info
+from scraper import scrap_company_info
 
 input_file = "input.txt"
 output_file = "output.csv"

@@ -1,11 +1,16 @@
 import time
+import os
 import traceback
 
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
-from link_exception import LinkException
-from scrap_utils import extract_financial_data_from_table
+from .link_exception import LinkException
+from .scrap_utils import extract_financial_data_from_table
+
+load_dotenv()
+DEBUG = os.environ.get("DEBUG", default=False)
 
 company_name_css_class = "Profile__Name"
 profile_info_css_class = "Profile__Info"
@@ -18,7 +23,7 @@ financial_table_css_class = "Financials__Table"
 
 def get_page_soup(page_url: str):
     # Fetch the content from the URL
-    time.sleep(0.3)
+    time.sleep(0.3) # A simple mechanism to not overload the scraped website
     response = requests.get(page_url)
 
     # Check if the request was successful
@@ -137,13 +142,14 @@ def scrap_company_info(company_url: str):
     try:
         company_info = extract_company_info(company_soup)
         return company_info
-    except Exception as e:
+    except:
         print(company_url, "not scraped")
-        # traceback.print_exc()
+        if DEBUG:
+            traceback.print_exc()
 
 
 if __name__ == "__main__":
     my_page_url = "https://www.finder.fi/Huolinta/Finnshipping+Ltd+Oy/Helsingfors/yhteystiedot/162707"
 
     my_soup = get_page_soup(my_page_url)
-    extract_company_info(my_soup)
+    print(extract_company_info(my_soup))
